@@ -2,6 +2,8 @@ package pubsub
 
 import (
 	"fmt"
+	"github.com/libp2p/go-libp2p-pubsub/dlog/dlpubsublog"
+	"go.uber.org/zap"
 
 	pb "github.com/libp2p/go-libp2p-pubsub/pb"
 
@@ -53,6 +55,8 @@ type CacheEntry struct {
 }
 
 func (mc *MessageCache) Put(msg *pb.Message) {
+	fromP, _ := peer.IDFromBytes(msg.From)
+	dlpubsublog.L.Debug("(mc *MessageCache) Put", zap.String("from", fromP.String()))
 	mid := mc.msgID(msg)
 	mc.msgs[mid] = msg
 	mc.history[0] = append(mc.history[0], CacheEntry{mid: mid, topics: msg.GetTopicIDs()})

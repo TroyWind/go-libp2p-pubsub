@@ -596,6 +596,7 @@ func (gs *GossipSubRouter) handleIHave(p peer.ID, ctl *pb.ControlMessage) []*pb.
 }
 
 func (gs *GossipSubRouter) handleIWant(p peer.ID, ctl *pb.ControlMessage) []*pb.Message {
+	dlpubsublog.L.Debug("GossipSubRouter) handleIWant", zap.String("for peer", p.String()))
 	// we don't respond to IWANT requests from any peer whose score is below the gossip threshold
 	score := gs.score.Score(p)
 	if score < gs.gossipThreshold {
@@ -1576,11 +1577,13 @@ func (gs *GossipSubRouter) sendGraftPrune(tograft, toprune map[peer.ID][]string,
 // emitGossip emits IHAVE gossip advertising items in the message cache window
 // of this topic.
 func (gs *GossipSubRouter) emitGossip(topic string, exclude map[peer.ID]struct{}) {
-	dlpubsublog.L.Debug("GossipSubRouter) emitGossip", zap.String("topic", topic))
 	mids := gs.mcache.GetGossipIDs(topic)
+	dlpubsublog.L.Debug("GossipSubRouter) emitGossip", zap.String("topic", topic), zap.Any("mids len", len(mids)))
 	if len(mids) == 0 {
 		return
 	}
+	mids0PID, _ := peer.IDFromString(mids[0])
+	dlpubsublog.L.Debug("GossipSubRouter) emitGossip", zap.String("topic", topic), zap.Any("mids[0]", mids0PID))
 
 	// shuffle to emit in random order
 	shuffleStrings(mids)
@@ -1628,6 +1631,7 @@ func (gs *GossipSubRouter) emitGossip(topic string, exclude map[peer.ID]struct{}
 			shuffleStrings(mids)
 			copy(peerMids, mids)
 		}
+		dlpubsublog.L.Debug("enqueueGossip", zap.String("to peer", p.String()), zap.String("topic", topic), zap.Any("mids len", len(mids)))
 		gs.enqueueGossip(p, &pb.ControlIHave{TopicID: &topic, MessageIDs: peerMids})
 	}
 }

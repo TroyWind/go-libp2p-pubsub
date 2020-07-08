@@ -3,6 +3,8 @@ package pubsub
 import (
 	"context"
 	"fmt"
+	"github.com/libp2p/go-libp2p-pubsub/dlog/dlpubsublog"
+	"go.uber.org/zap"
 	"math/rand"
 	"sort"
 	"time"
@@ -930,6 +932,7 @@ func (gs *GossipSubRouter) Publish(msg *Message) {
 }
 
 func (gs *GossipSubRouter) Join(topic string) {
+	dlpubsublog.L.Debug("GossipSubRouter) Join", zap.String("topic", topic))
 	gmap, ok := gs.mesh[topic]
 	if ok {
 		return
@@ -981,6 +984,7 @@ func (gs *GossipSubRouter) Join(topic string) {
 }
 
 func (gs *GossipSubRouter) Leave(topic string) {
+	dlpubsublog.L.Debug("GossipSubRouter) Leave", zap.String("topic", topic))
 	gmap, ok := gs.mesh[topic]
 	if !ok {
 		return
@@ -1193,6 +1197,7 @@ func fragmentMessageIds(msgIds []string, limit int) [][]string {
 }
 
 func (gs *GossipSubRouter) heartbeatTimer() {
+	dlpubsublog.L.Debug("GossipSubRouter) heartbeatTimer")
 	time.Sleep(GossipSubHeartbeatInitialDelay)
 	select {
 	case gs.p.eval <- gs.heartbeat:
@@ -1218,6 +1223,7 @@ func (gs *GossipSubRouter) heartbeatTimer() {
 }
 
 func (gs *GossipSubRouter) heartbeat() {
+	dlpubsublog.L.Debug("GossipSubRouter) heartbeat")
 	defer log.EventBegin(gs.p.ctx, "heartbeat").Done()
 
 	gs.heartbeatTicks++
@@ -1570,6 +1576,7 @@ func (gs *GossipSubRouter) sendGraftPrune(tograft, toprune map[peer.ID][]string,
 // emitGossip emits IHAVE gossip advertising items in the message cache window
 // of this topic.
 func (gs *GossipSubRouter) emitGossip(topic string, exclude map[peer.ID]struct{}) {
+	dlpubsublog.L.Debug("GossipSubRouter) emitGossip", zap.String("topic", topic))
 	mids := gs.mcache.GetGossipIDs(topic)
 	if len(mids) == 0 {
 		return

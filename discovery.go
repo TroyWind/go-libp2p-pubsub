@@ -2,7 +2,10 @@ package pubsub
 
 import (
 	"context"
+	"github.com/libp2p/go-libp2p-pubsub/dlog/dlpubsublog"
+	"go.uber.org/zap"
 	"math/rand"
+	"reflect"
 	"time"
 
 	"github.com/libp2p/go-libp2p-core/discovery"
@@ -299,6 +302,7 @@ func (d *discover) handleDiscovery(ctx context.Context, topic string, opts []dis
 	discoverCtx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
+	dlpubsublog.L.Debug("handleDiscovery", zap.String("topic", topic), zap.Any("opts", opts), zap.Any("d.discovery", reflect.TypeOf(d.discovery)))
 	peerCh, err := d.discovery.FindPeers(discoverCtx, topic, opts...)
 	if err != nil {
 		log.Debugf("error finding peers for topic %s: %v", topic, err)

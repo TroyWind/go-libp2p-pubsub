@@ -441,6 +441,7 @@ func (gs *GossipSubRouter) Attach(p *PubSub) {
 }
 
 func (gs *GossipSubRouter) AddPeer(p peer.ID, proto protocol.ID) {
+	dlpubsublog.L.Debug("GossipSubRouter) AddPeer", zap.String("p", p.String()), zap.String("proto", string(proto)))
 	log.Debugf("PEERUP: Add new peer %s using %s", p, proto)
 	gs.tracer.AddPeer(p, proto)
 	gs.peers[p] = proto
@@ -862,6 +863,7 @@ func (gs *GossipSubRouter) connector() {
 }
 
 func (gs *GossipSubRouter) Publish(msg *Message) {
+	dlpubsublog.L.Debug("GossipSubRouter) Publish", zap.Any("topics", msg.GetTopicIDs()))
 	gs.mcache.Put(msg.Message)
 	from := msg.ReceivedFrom
 
@@ -933,11 +935,12 @@ func (gs *GossipSubRouter) Publish(msg *Message) {
 }
 
 func (gs *GossipSubRouter) Join(topic string) {
-	dlpubsublog.L.Debug("GossipSubRouter) Join", zap.String("topic", topic))
+	dlpubsublog.L.Debug("GossipSubRouter) Join1", zap.String("topic", topic))
 	gmap, ok := gs.mesh[topic]
 	if ok {
 		return
 	}
+	dlpubsublog.L.Debug("GossipSubRouter) Join2", zap.String("topic", topic))
 
 	log.Debugf("JOIN %s", topic)
 	gs.tracer.Join(topic)
@@ -1542,6 +1545,7 @@ func (gs *GossipSubRouter) directConnect() {
 }
 
 func (gs *GossipSubRouter) sendGraftPrune(tograft, toprune map[peer.ID][]string, noPX map[peer.ID]bool) {
+	dlpubsublog.L.Debug("sendGraftPrune")
 	for p, topics := range tograft {
 		graft := make([]*pb.ControlGraft, 0, len(topics))
 		for _, topic := range topics {

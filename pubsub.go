@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/libp2p/go-libp2p-pubsub/dlog/dlpubsublog"
+	"go.uber.org/zap"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -922,6 +924,7 @@ func DefaultMsgIdFn(pmsg *pb.Message) string {
 
 // pushMsg pushes a message performing validation as necessary
 func (p *PubSub) pushMsg(msg *Message) {
+	dlpubsublog.L.Debug("PubSub) pushMsg", zap.Any("msg.ReceivedFrom", msg.ReceivedFrom))
 	src := msg.ReceivedFrom
 	// reject messages from blacklisted peers
 	if p.blacklist.Contains(src) {
@@ -1097,6 +1100,7 @@ func (p *PubSub) GetTopics() []string {
 //
 // Deprecated: use pubsub.Join() and topic.Publish() instead
 func (p *PubSub) Publish(topic string, data []byte, opts ...PubOpt) error {
+	dlpubsublog.L.Debug("PubSub) Publish", zap.String("topic", topic))
 	// ignore whether the topic was newly created or not, since either way we have a valid topic to work with
 	t, _, err := p.tryJoin(topic)
 	if err != nil {
